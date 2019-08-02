@@ -1,0 +1,6 @@
+#!/bin/bash
+
+virtualenv -p python3.7 env
+CURRENTDIR=$(pwd)
+echo "source $CURRENTDIR/env/bin/activate" > .envrc
+direnv allow .

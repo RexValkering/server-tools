@@ -1,0 +1,28 @@
+#!/bin/bash
+# Create an apache virtual host using a reverse proxy
+# Run as sudo
+
+read -p "Hostname (e.g. example.com): " HOST
+read -p "Name of service (e.g. example): " SERVICE
+read -p "Port of service (e.g. 9000): " PORT
+read -p "Server admin (e.g. admin@example.com): " ADMIN
+
+if ! curl -s $HOST >/dev/null
+then
+    echo "Host $HOST cannot be found using DNS, aborting."
+    exit
+fi
+		    
+cp ~/templates/virtualhost.conf /tmp/service.conf
+sed -i "s/<HOST>/$HOST/g" /tmp/service.conf
+sed -i "s/<SERVICE>/$SERVICE/g" /tmp/service.conf
+sed -i "s/<PORT>/$PORT/g" /tmp/service.conf
+sed -i "s/<ADMIN>/$ADMIN/g" /tmp/service.conf
+
+# Letsencrypt
+certbot -d $HOST certonly
+
+cp -i /tmp/service.conf "/etc/apache2/sites-available/$SERVICE.conf"
+rm /tmp/service.conf
+a2ensite $SERVICE
+service apache2 reload
